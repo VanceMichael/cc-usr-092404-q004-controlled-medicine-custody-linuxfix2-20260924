@@ -10,9 +10,11 @@ from sqlalchemy import engine_from_config, pool
 config = context.config
 if config.config_file_name:
     fileConfig(config.config_file_name)
-path = Path(os.getenv("DATABASE_PATH", "data/pharmacy_identity.sqlite3"))
-path.parent.mkdir(parents=True, exist_ok=True)
-config.set_main_option("sqlalchemy.url", f"sqlite:///{path.as_posix()}")
+# 显式 DATABASE_PATH 优先；否则沿用 alembic.ini / 编程方式配置的 URL。
+if os.getenv("DATABASE_PATH"):
+    path = Path(os.getenv("DATABASE_PATH"))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    config.set_main_option("sqlalchemy.url", f"sqlite:///{path.as_posix()}")
 target_metadata = None
 
 
